@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Failure Mode Explorer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="page-header">
+    <div class="page-header-inner">
+      <h1>AI Failure Mode Explorer</h1>
+      <p class="tagline">
+        A small interactive tool to explore hallucination, compression, contradiction, context collapse, and grounding failures.
+      </p>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Left: inputs + controls -->
+    <section class="panel panel-input">
+      <div class="panel-header">
+        <h2>Prompt, Context & Controls</h2>
+      </div>
+
+      <p class="help-text">
+        Choose a preset or add your own prompt, background context, and grounding snippets. Then pick a failure mode and generate a baseline vs stressed response.
+      </p>
+
+      <div class="preset-row">
+        <span class="preset-label">Quick presets:</span>
+        <div class="preset-buttons">
+          <button class="btn btn-secondary btn-preset" data-preset="policy">
+            Policy Q
+          </button>
+          <button class="btn btn-secondary btn-preset" data-preset="support">
+            Support Q
+          </button>
+          <button class="btn btn-secondary btn-preset" data-preset="analysis">
+            Analysis Q
+          </button>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="prompt-input">User prompt</label>
+        <textarea
+          id="prompt-input"
+          class="text-input"
+          rows="3"
+          spellcheck="false"
+          placeholder="Example: Explain our data retention policy to a non-technical customer in under 200 words."
+        ></textarea>
+      </div>
+
+      <div class="field-group">
+        <label for="context-input">Optional background context</label>
+        <textarea
+          id="context-input"
+          class="text-input"
+          rows="3"
+          spellcheck="false"
+          placeholder="Example: Internal notes, system configuration, or conversational history the model should consider."
+        ></textarea>
+      </div>
+
+      <div class="field-group">
+        <label for="sources-input">Source snippets / “grounding” text</label>
+        <textarea
+          id="sources-input"
+          class="text-input"
+          rows="3"
+          spellcheck="false"
+          placeholder="Example: Relevant documentation, knowledge base snippets, or paragraphs from a policy."
+        ></textarea>
+      </div>
+
+      <div class="mode-grid">
+        <div class="field-group">
+          <label for="mode-select">Failure mode to demonstrate</label>
+          <select id="mode-select" class="select-input">
+            <option value="hallucination">Hallucination (confident but unsupported)</option>
+            <option value="compression">Compression / oversimplification</option>
+            <option value="contradiction">Contradiction</option>
+            <option value="context_collapse">Context collapse</option>
+            <option value="grounding_failure">Grounding failure</option>
+          </select>
+          <p class="help-text help-text-tight">
+            This controls how the “stressed” response misbehaves.
+          </p>
+        </div>
+
+        <div class="field-group field-group-toggles">
+          <span class="toggle-group-label">Simulation knobs</span>
+          <label class="toggle-row">
+            <input type="checkbox" id="toggle-truncate" />
+            <span>Truncated context</span>
+          </label>
+          <label class="toggle-row">
+            <input type="checkbox" id="toggle-noise" />
+            <span>Noisy / conflicting sources</span>
+          </label>
+          <label class="toggle-row">
+            <input type="checkbox" id="toggle-length" />
+            <span>Long, messy prompt</span>
+          </label>
+          <label class="toggle-row">
+            <input type="checkbox" id="toggle-constraints" />
+            <span>Strict constraints</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="panel-footer">
+        <button id="generate-btn" class="btn btn-primary">
+          Generate Responses
+        </button>
+        <span id="status" class="parse-status" aria-live="polite"></span>
+      </div>
+    </section>
+
+    <!-- Right: outputs + comparison -->
+    <section class="panel panel-output">
+      <div class="panel-header">
+        <h2>Baseline vs Stressed Response</h2>
+      </div>
+
+      <div id="summary" class="summary">
+        <div class="summary-badge summary-badge-idle">
+          No responses yet. Add a prompt (or use a preset), choose a failure mode, then click <strong>Generate Responses</strong>.
+        </div>
+      </div>
+
+      <div class="output-grid">
+        <article class="output-card">
+          <header class="output-header">
+            <div class="output-title-row">
+              <span class="output-label">Baseline Response</span>
+              <span class="output-pill output-pill-baseline">Baseline</span>
+            </div>
+            <p class="output-meta" id="baseline-meta">
+              Simulated grounded response that tries to respect prompt, context, and sources.
+            </p>
+          </header>
+          <div class="output-body">
+            <pre id="baseline-text" class="output-text">
+No response yet. Generate to see a baseline answer.</pre>
+          </div>
+        </article>
+
+        <article class="output-card">
+          <header class="output-header">
+            <div class="output-title-row">
+              <span class="output-label">Stressed Response</span>
+              <span class="output-pill output-pill-mode" id="mode-pill">
+                Hallucination
+              </span>
+            </div>
+            <p class="output-meta" id="stressed-meta">
+              Simulated response under: <strong>Hallucination</strong>.
+            </p>
+          </header>
+          <div class="output-body">
+            <pre id="stressed-text" class="output-text">
+No response yet. Generate to see how the failure mode appears.</pre>
+          </div>
+        </article>
+      </div>
+
+      <div class="comparison-section">
+        <h3>What to watch for</h3>
+        <p id="watch-text" class="comparison-text">
+          When you generate responses, this section will highlight the specific differences between baseline and stressed outputs that illustrate the active failure mode.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <p>
+      Part of the
+      <a href="https://github.com/rtfenter/Applied-Intelligence-Systems-Series" target="_blank" rel="noreferrer">
+        Applied Intelligence Systems Series
+      </a>.
+    </p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
