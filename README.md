@@ -43,7 +43,7 @@ The first version will include:
 
 ## Demo Screenshot
 
-_Screenshot placeholder until UI is ready_
+<img width="2806" height="2094" alt="Screenshot 2025-11-28 at 16-11-08 AI Failure Mode Explorer" src="https://github.com/user-attachments/assets/a64aaca0-0e7b-4eae-bf67-fa5be2fdca9a" />
 
 ---
 
